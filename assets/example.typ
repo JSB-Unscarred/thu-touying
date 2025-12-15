@@ -1,4 +1,4 @@
-#import "THUTouying.typ": *
+#import "../lib.typ": *
 
 #show: THUTouying-theme.with(
   config-info(
