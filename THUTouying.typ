@@ -394,19 +394,33 @@
 /// - body (none): is the body of the section. It will be passed by touying automatically.
 #let new-section-slide(
   config: (:),
-  title: utils.i18n-outline-title,
-  level: 1,
-  numbered: true,
+  title: auto,
   ..args,
-  body,
-) = outline-slide(
-  config: config,
-  title: title,
-  level: level,
-  numbered: numbered,
-  ..args,
-  body,
-)
+) = touying-slide-wrapper(self => {
+  let body = args.pos().sum(default: none)
+
+  touying-slide(
+    self: self,
+    config: config,
+    std.align(center + horizon, {
+      set text(fill: self.colors.primary, weight: "bold", size: 2.5em)
+      
+      if title != auto {
+        title
+        if body != none {
+          parbreak()
+          v(0.5em)
+          set text(size: 0.8em) 
+          body
+        }
+      } else if body != none {
+        body
+      } else {
+        utils.display-current-heading(level: 1)
+      }
+    })
+  )
+})
 
 
 /// 5. 焦点页 (Focus Slide)

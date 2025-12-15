@@ -26,7 +26,7 @@
   利用 Rust 的内存安全特性和 CUDA 加速能力，构建一套高吞吐量的视觉识别系统。
 ]
 
-#new-section-slide("技术架构")
+#new-section-slide(title: "技术架构")[111]
 
 = 技术栈选择
 
