@@ -540,6 +540,7 @@
   aspect-ratio: "16-9",
   align: horizon,
   alpha: 20%, // 目录透明度
+  display-section-slides: false, // 是否显示章节页
   title: self => utils.display-current-heading(depth: self.slide-level),
   // 删除了 unused header-right
   progress-bar: true,
@@ -605,7 +606,11 @@
     ),
     config-common(
       slide-fn: slide,
-      new-section-slide-fn: new-section-slide,
+      new-section-slide-fn: if display-section-slides { 
+        new-section-slide 
+      } else { 
+        none 
+      },
     ),
     config-methods(
       init: (self: none, body) => {
