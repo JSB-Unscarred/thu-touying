@@ -6,3 +6,5 @@ authors = ["Mason Chen"]  # 你的名字
 license = "MIT"          # 协议
 description = "A clean, Beamer-style presentation template for Tsinghua University."
 repository = "https://github.com/JSB-Unscarred/thu-touying"
+
+exclude = ["*.pdf", "assets"]
