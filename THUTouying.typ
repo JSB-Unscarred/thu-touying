@@ -543,8 +543,8 @@
   display-section-slides: false, // 是否显示章节页
   title: self => utils.display-current-heading(depth: self.slide-level),
   // 删除了 unused header-right
-  progress-bar: true,
-  // 页脚各部分配置（可以通过传参修改）
+  // 删除了 ununsed progress-bar
+  // 页脚各部分配置（可通过传参修改）
   footer-columns: (35%, 1fr, 5em),
   footer-a: self => self.info.author,
   // 删除了 unused footer-b 的参数定义
@@ -581,16 +581,6 @@
     grid(
       rows: (auto, auto),
       utils.call-or-display(self, self.store.footer),
-      if self.store.progress-bar {
-        utils.call-or-display(
-          self,
-          components.progress-bar(
-            height: 2pt,
-            self.colors.primary,
-            self.colors.neutral-lightest,
-          ),
-        )
-      },
     )
   }
 
@@ -643,7 +633,6 @@
       align: align,
       alpha: alpha,
       title: title,
-      progress-bar: progress-bar,
       footer-columns: footer-columns,
       footer-a: footer-a,
       footer-c: footer-c,
