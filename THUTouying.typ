@@ -94,36 +94,54 @@
 
 /// Mini-frames 导航栏
 #let mini-frames-navigation(self: none) = {
-  let primary-color = self.colors.primary-dark
+  let primary-color = self.colors.primary-dark 
   let text-color = self.colors.neutral-lightest
   
   context {
-    // 1. 获取章节结构
+    // 获取章节结构和当前页码
     let sections = get-sections(self)
-    // 2. 获取当前所在页码
     let current-page = here().page()
+    
+    // 计算当前激活的是哪个章节 (Active Section)
+    // 逻辑：找到最后一个起始页码小于等于当前页码的章节
+    let active-section-index = -1
+    for (i, section) in sections.enumerate() {
+      if section.loc.page() <= current-page {
+        active-section-index = i
+      }
+    }
     
     block(
       width: 100%, 
       fill: primary-color, 
       inset: (top: 0.6em, bottom: 0.4em, x: 2em),
       {
-        set text(fill: text-color, size: 0.7em)
+        set text(size: 0.7em)
         set align(left + horizon)
         
         grid(
           columns: sections.map(_ => auto),
           column-gutter: 1.5em,
           
-          ..sections.map(section => {
-            // 顶部：章节标题
-            // section.loc 是我们在 get-sections 里存好的 location 对象
+          // 使用 enumerate 获取索引，以便判断是否为当前章节
+          ..sections.enumerate().map(((i, section)) => {
+            // A. 判断本列是否需要高亮
+            let is-active-section = (i == active-section-index)
+            
+            // B. 定义颜色：激活章节用纯白，非激活章节用 60% 透明度的白(变暗)
+            let section-color = if is-active-section {
+              text-color
+            } else {
+              text-color.transparentize(60%)
+            }
+
+            // C. 渲染标题 (应用 section-color)
             let title = link(
               section.loc, 
-              text(weight: "bold", section.title)
+              text(fill: section-color, weight: "bold", section.title)
             )
             
-            // 小圆点
+            // D. 渲染小圆点
             let dots = if section.children.len() > 0 {
               stack(
                 dir: ltr,
@@ -131,15 +149,20 @@
                 ..section.children.map(subsection => {
                   let loc = subsection.location()
                   let page-num = loc.page()
-                  let is-current = page-num == current-page
+                  
+                  // E. 严格判断是否为当前页 (用于实心/空心)
+                  let is-current-page = (page-num == current-page)
                   
                   link(
                     loc,
                     box(
                       circle(
                         radius: 2.5pt,
-                        stroke: (paint: text-color, thickness: 0.8pt),
-                        fill: if is-current { text-color } else { none } 
+                        // 描边颜色跟随章节颜色 (变暗或高亮)
+                        stroke: (paint: section-color, thickness: 0.8pt),
+                        // 填充颜色：只有当前页才填充，且颜色跟随章节高亮状态
+                        // 以前的逻辑可能导致了之前的页也是实心，现在严格限制为 is-current-page
+                        fill: if is-current-page { section-color } else { none } 
                       )
                     )
                   )

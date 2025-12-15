@@ -40,3 +40,9 @@
    - candle (Hugging Face 的 Rust ML 框架)
 
 == 关键代码示例
+- Rust代码示例
+#lorem(80)
+
+= YOLO 模型集成
+== YOLOv11简介
+我们集成了 YOLOv11 模型，利用其高效的目标检测能力来识别木材缺陷。
