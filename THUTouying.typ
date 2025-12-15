@@ -10,7 +10,7 @@
 /// 基础视觉组件 (The Bricks)
 /// 这里定义了页面内部的小组件，比如“定理块”或者带有特定样式的方块
 
-/// 内部函数：定义文本块的具体渲染逻辑（Grid布局 + 渐变分割线）
+/// 文本块
 #let _tblock(self: none, title: none, it) = {
   grid(
     columns: 1,
@@ -57,6 +57,110 @@
   title: title,
   it,
 ))
+
+/// 辅助函数：获取文档的章节和子页面结构
+/// 返回结构: ((title: content, loc: location, children: (loc: location, ...)), ...)
+#let get-sections(self) = {
+  // 1. 获取所有标题
+  let all-headings = query(heading)
+  
+  let sections = ()
+  let current-section = none
+
+  // 2. 遍历标题构建层级
+  for h in all-headings {
+    if h.level == 1 {
+      // 遇到一级标题：归档上一个章节，开始新章节
+      if current-section != none { sections.push(current-section) }
+      current-section = (
+        title: h.body, 
+        loc: h.location(), // 存入 location 对象
+        children: ()
+      )
+    } else if h.level == 2 {
+      // 遇到二级标题：加入当前章节的 children
+      if current-section != none {
+        // 这里的 children 我们直接存整个标题元素，方便后续取 location
+        current-section.children.push(h)
+      }
+    }
+  }
+  // 归档最后一个章节
+  if current-section != none { sections.push(current-section) }
+  
+  sections
+}
+
+
+/// Mini-frames 导航栏
+#let mini-frames-navigation(self: none) = {
+  let primary-color = self.colors.primary-dark
+  let text-color = self.colors.neutral-lightest
+  
+  context {
+    // 1. 获取章节结构
+    let sections = get-sections(self)
+    // 2. 获取当前所在页码
+    let current-page = here().page()
+    
+    block(
+      width: 100%, 
+      fill: primary-color, 
+      inset: (top: 0.6em, bottom: 0.4em, x: 2em),
+      {
+        set text(fill: text-color, size: 0.7em)
+        set align(left + horizon)
+        
+        grid(
+          columns: sections.map(_ => auto),
+          column-gutter: 1.5em,
+          
+          ..sections.map(section => {
+            // 顶部：章节标题
+            // section.loc 是我们在 get-sections 里存好的 location 对象
+            let title = link(
+              section.loc, 
+              text(weight: "bold", section.title)
+            )
+            
+            // 小圆点
+            let dots = if section.children.len() > 0 {
+              stack(
+                dir: ltr,
+                spacing: 4pt,
+                ..section.children.map(subsection => {
+                  let loc = subsection.location()
+                  let page-num = loc.page()
+                  let is-current = page-num == current-page
+                  
+                  link(
+                    loc,
+                    box(
+                      circle(
+                        radius: 2.5pt,
+                        stroke: (paint: text-color, thickness: 0.8pt),
+                        fill: if is-current { text-color } else { none } 
+                      )
+                    )
+                  )
+                })
+              )
+            } else {
+              v(5pt) 
+            }
+
+            stack(
+              dir: ttb,
+              spacing: 0.4em,
+              title,
+              dots
+            )
+          })
+        )
+      }
+    )
+  }
+}
 
 
 
@@ -416,11 +520,12 @@
   align: horizon,
   alpha: 20%, // 目录透明度
   title: self => utils.display-current-heading(depth: self.slide-level),
-  header-right: self => self.info.logo,
+  // 删除了 unused header-right
   progress-bar: true,
   // 页脚各部分配置（可以通过传参修改）
   footer-columns: (35%, 1fr, 5em),
   footer-a: self => self.info.author,
+  // 删除了 unused footer-b 的参数定义
   footer-c: self => if self.info.short-title == auto {
     self.info.title
   } else {
@@ -435,10 +540,15 @@
   // 定义全局页眉布局
   let header(self) = {
     set std.align(top)
-    grid(
-      rows: (auto, auto),
-      utils.call-or-display(self, self.store.navigation),
-      utils.call-or-display(self, self.store.header),
+    stack(
+      dir: ttb,       // 从上到下排列
+      spacing: 0em,   // 去除中间的缝隙
+      
+      // 1. 顶部的导航栏
+      mini-frames-navigation(self: self),
+      
+      // 2. 下面的幻灯片标题栏
+      utils.call-or-display(self, self.store.header)
     )
   }
 
@@ -507,19 +617,14 @@
       align: align,
       alpha: alpha,
       title: title,
-      header-right: header-right,
       progress-bar: progress-bar,
       footer-columns: footer-columns,
       footer-a: footer-a,
       footer-c: footer-c,
       footer-d: footer-d,
-      navigation: self => components.simple-navigation(
-        self: self,
-        primary: white,
-        secondary: gray,
-        background: self.colors.primary-dark,
-        logo: utils.call-or-display(self, self.store.header-right),
-      ),
+
+      // 删除了 unused navigation 键
+      
       header: self => if self.store.title != none {
         block(
           width: 100%,
@@ -537,6 +642,7 @@
           ),
         )
       },
+ 
       footer: self => {
         let cell(fill: none, it) = rect(
           width: 100%,
