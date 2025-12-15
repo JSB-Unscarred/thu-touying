@@ -4,15 +4,13 @@
   config-info(
     title: [Rust 机器学习与工业视觉],
     subtitle: [基于 YOLO 和线阵相机的缺陷检测系统],
-    author: [你的名字],
+    author: [陈海翔（CHEN MASON）],
     date: datetime.today(),
-    institution: [清华大学],
+    institution: [清华大学社科学院经济学研究所],
   ),
 )
 
 #title-slide()
-
-#outline-slide()
 
 = 项目背景
 

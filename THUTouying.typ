@@ -419,9 +419,8 @@
   header-right: self => self.info.logo,
   progress-bar: true,
   // 页脚各部分配置（可以通过传参修改）
-  footer-columns: (25%, 25%, 1fr, 5em),
+  footer-columns: (35%, 1fr, 5em),
   footer-a: self => self.info.author,
-  footer-b: self => utils.display-info-date(self),
   footer-c: self => if self.info.short-title == auto {
     self.info.title
   } else {
@@ -499,6 +498,7 @@
     ),
     config-colors(
       primary: rgb("#660874"), //参考了清华大学视觉形象识别系统（https://vi.tsinghua.edu.cn/gk/xxbz/scgf.htm）的参数，经过换算后为#660874
+      primary-dark: rgb("#320439"),
       neutral-lightest: rgb("#ffffff"),
       neutral-darkest: rgb("#000000"),
     ),
@@ -511,24 +511,20 @@
       progress-bar: progress-bar,
       footer-columns: footer-columns,
       footer-a: footer-a,
-      footer-b: footer-b,
       footer-c: footer-c,
       footer-d: footer-d,
       navigation: self => components.simple-navigation(
         self: self,
         primary: white,
         secondary: gray,
-        background: self.colors.neutral-darkest,
+        background: self.colors.primary-dark,
         logo: utils.call-or-display(self, self.store.header-right),
       ),
       header: self => if self.store.title != none {
         block(
           width: 100%,
           height: 1.8em,
-          fill: gradient.linear(
-            self.colors.primary,
-            self.colors.neutral-darkest,
-          ),
+          fill: self.colors.primary,
           place(
             left + horizon,
             text(
@@ -554,13 +550,9 @@
         grid(
           columns: self.store.footer-columns,
           rows: (1.5em, auto),
-          cell(fill: self.colors.neutral-darkest, utils.call-or-display(
+          cell(fill: self.colors.primary, utils.call-or-display(
             self,
             self.store.footer-a,
-          )),
-          cell(fill: self.colors.neutral-darkest, utils.call-or-display(
-            self,
-            self.store.footer-b,
           )),
           cell(fill: self.colors.primary, utils.call-or-display(
             self,
