@@ -1,10 +1,9 @@
-// THUTouying theme.
+// ShuimuTouying 
+// a THU Touying theme.
 // Authors: Mason Chen
 // Inspired by Stargazer theme
 
 #import "@preview/touying:0.6.1": *
-
-
 
 
 /// 基础视觉组件 (The Bricks)
@@ -582,9 +581,11 @@
   ..args,
   body,
 ) = {
+  let main-fonts = ("Linux Libertine","Palatino","Noto Serif CJK SC","Songti SC")
   // 定义全局页眉布局
   let header(self) = {
     set std.align(top)
+    set text(font: main-fonts)
     stack(
       dir: ttb,       // 从上到下排列
       spacing: 0em,   // 去除中间的缝隙
@@ -599,7 +600,7 @@
 
   // 定义全局页脚布局
   let footer(self) = {
-    set text(size: .5em)
+    set text(font: main-fonts, size: .5em)
     set std.align(center + bottom)
     grid(
       rows: (auto, auto),
@@ -627,11 +628,11 @@
     ),
     config-methods(
       init: (self: none, body) => {
-        set text(size: 20pt)
+        set text(font: main-fonts, size: 20pt)
         set list(marker: components.knob-marker(primary: self.colors.primary))
         show figure.caption: set text(size: 0.6em)
         show footnote.entry: set text(size: 0.6em)
-        show heading: set text(fill: self.colors.primary)
+        show heading: set text(fill: self.colors.primary,weight: "black")
         show link: it => if type(it.dest) == str {
           set text(fill: self.colors.primary)
           it

@@ -14,13 +14,13 @@
 ### 方式一：使用 Typst Universe (推荐)
 
 ```typst
-#import "@preview/shuimu-touying:0.1.0": *
+#import "@preview/shuimu-touying:0.2.0": *
 
 #show: shuimu-touying-theme.with(
   config-info(
     title: [汇报标题],
     subtitle: [副标题],
-    author: [你的名字],
+    author: [*你的名字*], //加粗显示姓名
     date: datetime.today(),
     institution: [清华大学],
   ),
@@ -44,6 +44,6 @@
 在你的工作目录下新建终端，并运行以下命令：
 
 ```
-typst init @preview/shuimu-touying:0.1.0 my-slide
+typst init @preview/shuimu-touying:0.2.0 my-slide
 ```
 

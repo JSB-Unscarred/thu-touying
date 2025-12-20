@@ -1,11 +1,11 @@
-#import "@preview/shuimu-touying:0.1.0": *
-//#import "../lib.typ": *
+#import "@preview/shuimu-touying:0.2.0": *
+// #import "../lib.typ": *
 
 #show: shuimu-touying-theme.with(
   config-info(
     title: [Rust 机器学习与工业视觉],
     subtitle: [基于 YOLO 和线阵相机的缺陷检测系统],
-    author: [陈海翔（CHEN MASON）],
+    author: [*陈海翔（CHEN MASON）*], //加粗显示姓名
     date: datetime.today(),
     institution: [清华大学社科学院经济学研究所],
   ),
@@ -21,7 +21,7 @@
 
 我们在木材缺陷检测中面临以下挑战：
 
-- 数据量巨大：线阵相机生成的图片尺寸高达 $2800 times 1024$ 或更长。
+- *数据量巨大*：线阵相机生成的图片尺寸高达 $2800 times 1024$ 或更长。
 - 实时性要求：传统的 Python 推理速度难以满足工业流水线需求。
 - 环境复杂：需要精确控制白平衡和伽马校正。
 
