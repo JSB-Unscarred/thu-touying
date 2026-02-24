@@ -58,34 +58,45 @@
 ))
 
 /// 辅助函数：获取文档的章节和子页面结构
-/// 返回结构: ((title: content, loc: location, children: (loc: location, ...)), ...)
 #let get-sections(self) = {
-  // 1. 获取所有标题
-  let all-headings = query(heading)
+  // 1. 获取所有一级标题
+  let all-headings = query(heading.where(level: 1))
+  
+  // 2. 获取所有的幻灯片页面（优先查我们的自定义标签，查不到则用底层标签）
+  let all-slides = query(<touying-slide-page>)
+  if all-slides.len() == 0 {
+    all-slides = query(<touying-slide>)
+  }
   
   let sections = ()
-  let current-section = none
-
-  // 2. 遍历标题构建层级
-  for h in all-headings {
-    if h.level == 1 {
-      // 遇到一级标题：归档上一个章节，开始新章节
-      if current-section != none { sections.push(current-section) }
-      current-section = (
-        title: h.body, 
-        loc: h.location(), // 存入 location 对象
-        children: ()
-      )
-    } else if h.level == 2 {
-      // 遇到二级标题：加入当前章节的 children
-      if current-section != none {
-        // 这里的 children 我们直接存整个标题元素，方便后续取 location
-        current-section.children.push(h)
+  
+  for (i, h) in all-headings.enumerate() {
+    let start-page = h.location().page()
+    // 获取下一章的起始页码，如果是最后一章则设为一个极大的值
+    let end-page = if i + 1 < all-headings.len() {
+      all-headings.at(i + 1).location().page()
+    } else {
+      999999 
+    }
+    
+    let children = ()
+    let last-page = 0
+    
+    // 筛选属于当前章节的 slides，并按物理页码去重
+    for s in all-slides {
+      let p = s.location().page()
+      if p >= start-page and p < end-page and p != last-page {
+        children.push(s)
+        last-page = p
       }
     }
+    
+    sections.push((
+      title: h.body, 
+      loc: h.location(), 
+      children: children
+    ))
   }
-  // 归档最后一个章节
-  if current-section != none { sections.push(current-section) }
   
   sections
 }
@@ -145,8 +156,8 @@
               stack(
                 dir: ltr,
                 spacing: 4pt,
-                ..section.children.map(subsection => {
-                  let loc = subsection.location()
+                ..section.children.map(slide-page => {
+                  let loc = slide-page.location()
                   let page-num = loc.page()
                   
                   // E. 严格判断是否为当前页 (用于实心/空心)
@@ -244,6 +255,7 @@
   let new-setting = body => {
     show: std.align.with(self.store.align)
     show: setting
+    [#hide[#"" <touying-slide-page>]] //注入物理页签，用于导航栏的页码检测
     body
   }
   touying-slide(
@@ -340,7 +352,7 @@
     // date
     if info.date != none {
       parbreak()
-      text(size: 1.0em, utils.display-info-date(self))
+      text(size: 0.7em, utils.display-info-date(self))
     }
   }
   touying-slide(self: self, body)
