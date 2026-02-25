@@ -58,46 +58,33 @@
 ))
 
 /// 辅助函数：获取文档的章节和子页面结构
+/// children 为该章节包含的所有物理页码数组（已排除 focus-slide 等标记了 skip 的页面）
 #let get-sections(self) = {
-  // 1. 获取所有一级标题
   let all-headings = query(heading.where(level: 1))
-  
-  // 2. 获取所有的幻灯片页面（优先查我们的自定义标签，查不到则用底层标签）
-  let all-slides = query(<touying-slide-page>)
-  if all-slides.len() == 0 {
-    all-slides = query(<touying-slide>)
-  }
-  
+  let skip-pages = query(<touying-skip-dot>).map(s => s.location().page())
+  // 用所有 heading 和 skip 标签中的最大页码来推断文档末尾
+  let last-known-page = calc.max(
+    ..all-headings.map(h => h.location().page()),
+    ..skip-pages,
+    ..query(<touying-slide-page>).map(s => s.location().page()),
+  )
   let sections = ()
-  
+
   for (i, h) in all-headings.enumerate() {
     let start-page = h.location().page()
-    // 获取下一章的起始页码，如果是最后一章则设为一个极大的值
     let end-page = if i + 1 < all-headings.len() {
       all-headings.at(i + 1).location().page()
     } else {
-      999999 
+      last-known-page + 1
     }
-    
-    let children = ()
-    let last-page = 0
-    
-    // 筛选属于当前章节的 slides，并按物理页码去重
-    for s in all-slides {
-      let p = s.location().page()
-      if p >= start-page and p < end-page and p != last-page {
-        children.push(s)
-        last-page = p
-      }
-    }
-    
+
     sections.push((
-      title: h.body, 
-      loc: h.location(), 
-      children: children
+      title: h.body,
+      loc: h.location(),
+      children: range(start-page, end-page).filter(p => p not in skip-pages),
     ))
   }
-  
+
   sections
 }
 
@@ -156,23 +143,16 @@
               stack(
                 dir: ltr,
                 spacing: 4pt,
-                ..section.children.map(slide-page => {
-                  let loc = slide-page.location()
-                  let page-num = loc.page()
-                  
-                  // E. 严格判断是否为当前页 (用于实心/空心)
+                ..section.children.map(page-num => {
                   let is-current-page = (page-num == current-page)
-                  
+
                   link(
-                    loc,
+                    section.loc,
                     box(
                       circle(
                         radius: 2.5pt,
-                        // 描边颜色跟随章节颜色 (变暗或高亮)
                         stroke: (paint: section-color, thickness: 0.8pt),
-                        // 填充颜色：只有当前页才填充，且颜色跟随章节高亮状态
-                        // 以前的逻辑可能导致了之前的页也是实心，现在严格限制为 is-current-page
-                        fill: if is-current-page { section-color } else { none } 
+                        fill: if is-current-page { section-color } else { none }
                       )
                     )
                   )
@@ -347,17 +327,16 @@
         
         // 2. 渲染为标准列表
         if sections.len() > 0 {
-          list(
-            // 自定义列表符号：使用主色的实心圆点
-            marker: text(fill: self.colors.primary-dark)[●], 
-            // 列表间距
-            body-indent: 0.5em,
-            indent: 1em,
-            spacing: 1.5em, 
-            
-            // 3. 循环生成列表项
-            ..sections.map(section => {
-              link(section.loc, section.title)
+          stack(
+            dir: ttb,
+            spacing: 1.5em,
+            ..sections.enumerate().map(((i, section)) => {
+              let num-circle = box(
+                width: 1.1em, height: 1.1em, radius: 50%,
+                fill: self.colors.primary,
+                place(center + horizon, text(fill: white, weight: "bold", size: 0.75em, top-edge: "bounds", bottom-edge: "bounds", str(i + 1)))
+              )
+              box(stack(dir: ltr, spacing: 0.5em, num-circle, link(section.loc, section.title)))
             })
           )
         } else {
@@ -421,7 +400,10 @@
     ),
   )
   set text(fill: self.colors.neutral-lightest, weight: "bold", size: 1.5em)
-  touying-slide(self: self, config: config, std.align(align, body))
+  touying-slide(self: self, config: config, {
+    [#hide[#"" <touying-skip-dot>]]
+    std.align(align, body)
+  })
 })
 
 

@@ -38,4 +38,4 @@
 - #lorem(50)
 - #lorem(50)
 
-#focus-slide([向大家致敬！]) 
+#focus-slide([向大家致敬！])
