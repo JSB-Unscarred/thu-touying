@@ -11,37 +11,18 @@
 
 ## 使用方法
 
+### 安装字体
+为了显示效果，本模板的英文使用了Linux Libertine字体，中文使用了Noto Serif CJK SC字体。如果在本地端进行编译，请先安装这两个字体。
+
 ### 方式一：使用 Typst Universe (推荐)
 
 ```typst
 #import "@preview/shuimu-touying:0.2.0": *
-
-#show: shuimu-touying-theme.with(
-  config-info(
-    title: [汇报标题],
-    subtitle: [副标题],
-    author: [*你的名字*], //加粗显示姓名
-    date: datetime.today(),
-    institution: [清华大学],
-  ),
-  display-section-slides: true, 
-)
-
-#title-slide()
-#outline-slide()
-
-= 第一章 项目背景
-
-== 研究意义
-
-#tblock(title: "核心目标")[
-  这是一个带标题栏的文本块。
-]
 ```
 
 ### 方式二：typst init命令
 
-在你的工作目录下新建终端，并运行以下命令：
+在工作目录下新建终端，并运行以下命令：
 
 ```
 typst init @preview/shuimu-touying:0.2.0 my-slide
